@@ -22,13 +22,18 @@ def main(**arg):
 
     gap_size = arg['gap_size'][0]
     strain_cutoff = arg['strain_cutoff'][0]
+    def leaf2cluster(self, leaf, stats, gap_size, strain_cutoff = 99, bottom_cutoff = 90):
+        current_stats = stats[leaf]
+        parent_id = current_stats['parent_id']
+        if parent_id is None :
+
     bottom_cutoff = arg['lower_cutoff'][0]
     denoising_cutoff = arg['denoising_cutoff'][0]
 
     anis = parse_fastani_output(arg['similarities'][0])
-    guide_tree = get_guidetree_class(arg['guide_tree'][0])
+    guide_tree_type = arg['guide_tree'][0]
 
-    clustering = cluster_simple(anis, guide_tree, gap_size = gap_size, strain_cutoff = strain_cutoff, bottom_cutoff = bottom_cutoff, denoising_cutoff = denoising_cutoff)
+    clustering = cluster_simple(anis, guide_tree_class, gap_size = gap_size, strain_cutoff = strain_cutoff, bottom_cutoff = bottom_cutoff, denoising_cutoff = denoising_cutoff)
 
 if __name__ == "__main__":
 
