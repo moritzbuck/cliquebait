@@ -22,10 +22,6 @@ def main(**arg):
 
     gap_size = arg['gap_size'][0]
     strain_cutoff = arg['strain_cutoff'][0]
-    def leaf2cluster(self, leaf, stats, gap_size, strain_cutoff = 99, bottom_cutoff = 90):
-        current_stats = stats[leaf]
-        parent_id = current_stats['parent_id']
-        if parent_id is None :
 
     bottom_cutoff = arg['lower_cutoff'][0]
     denoising_cutoff = arg['denoising_cutoff'][0]
