@@ -3,9 +3,9 @@ from ast import arg, main
 import os
 import sys
 from sys import stderr
-from cliqueblocks.clustering.cliqueblocksClustering import cluster_simple
 from cliqueblocks.utils import parse_fastani_output
 from cliqueblocks.guidetrees import available_guidetrees, get_guidetree_class
+from cliqueblocks.clustering.cliqueblocksClustering import cliqueblocksClustering
 import cliqueblocks
 
 description_text = "TO DO"
@@ -29,7 +29,8 @@ def main(**arg):
     anis = parse_fastani_output(arg['similarities'][0])
     guide_tree_type = arg['guide_tree'][0]
 
-    clustering = cluster_simple(anis, guide_tree_class, gap_size = gap_size, strain_cutoff = strain_cutoff, bottom_cutoff = bottom_cutoff, denoising_cutoff = denoising_cutoff)
+    clustering = cliqueblocksClustering(guide_tree_type, anis, gap_size=gap_size, strain_cutoff=strain_cutoff, bottom_cutoff=bottom_cutoff, denoising_cutoff=denoising_cutoff)  
+    clustering.cluster_simple()
 
 if __name__ == "__main__":
 

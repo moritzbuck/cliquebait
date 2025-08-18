@@ -1,4 +1,4 @@
-from scipy.node.hierarchy import linkage, to_tree
+from scipy.cluster.hierarchy import linkage, to_tree
 from scipy.spatial.distance import pdist, squareform
 from numpy import array
 
@@ -41,7 +41,7 @@ class Hierarchicalnodeing:
         panis = pdist(array(square, dtype = float))
         links_ = linkage(panis, method=self.method)
         self.tree = to_tree(links_)
-        self.node2parent = { node : parent for node, parent in self.iterate_nodes_parents()}}
+        self.node2parent = { node.id : parent for node, parent in self.iterate_nodes_parents()}
 
     def iterate_nodes_parents(self):
         return self._iterate_node_parents(self.tree)
@@ -50,7 +50,7 @@ class Hierarchicalnodeing:
         if node.is_leaf():
             return [(node, None if not parent else parent.id)]
         else :
-            return iterate_nodes(node.left, node) + iterate_nodes(node.right, node) + [(node, None if not parent else parent.id)]
+            return self._iterate_node_parents(node.left, node) + self._iterate_node_parents(node.right, node) + [(node, None if not parent else parent.id)]
 
     def iterate_nodes(self):
         return self._iterate_nodes(self.tree)
@@ -58,20 +58,22 @@ class Hierarchicalnodeing:
     def get_nodes_info(self):
         return [self.get_node_info(node) for node in self.iterate_nodes()]
 
-    def _iterate_nodeS(self, node):
+    def _iterate_nodes(self, node):
         if node.is_leaf():
             return [node]
         else :
-            return iterate_nodes(node.left) + iterate_nodes(node.right) + [node]
+            return self._iterate_nodes(node.left) + self._iterate_nodes(node.right) + [node]
 
-    def get_leaves(self):
-        return self._get_leaves(self.tree)
+    def get_leaves(self, node = None):
+        if node is None:
+            node = self.tree
+        return self._get_leaves(node)
 
     def _get_leaves(self, node):
         if node.is_leaf() :
             return [node]
         else :
-            return get_leaves(node.left) + get_leaves(node.right)
+            return self._get_leaves(node.left) + self._get_leaves(node.right)
 
     
     def get_node_info(self, node):

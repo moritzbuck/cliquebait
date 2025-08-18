@@ -4,11 +4,11 @@ from cliqueblocks.guidetrees import get_guidetree_class
 
 class cliqueblocksClustering:
 
-    def __init__(self, guide_tree_class, ani_dictionary, gap_size = 2.5, strain_cutoff = 97.5, size_cutoff = 5, bottom_cutoff = 89, denoising_cutoff = 0.5):
-        self.guidetree_class = guide_tree_class
+    def __init__(self, guidetree_class, ani_dictionary, gap_size = 2.5, strain_cutoff = 97.5, size_cutoff = 5, bottom_cutoff = 89, denoising_cutoff = 0.5):
+        self.guidetree_class = guidetree_class
         self.verbose = get_verbose()
         self.ani_dictionary = ani_dictionary
-        self.guide_tree = get_guidetree_class(self.guide_tree_class)
+        self.guide_tree = get_guidetree_class(self.guidetree_class)
         self.guide_tree.compute_tree(self.ani_dictionary)
         self.clusters = None
         self.gap_size = gap_size
@@ -27,15 +27,15 @@ class cliqueblocksClustering:
                     'cliqueness'      : 1.0
                     }
             
-        zanis = self.anis.getset(cluster)
-        cliqueness = sum([a != self.anis.default for a in zanis])/len(zanis)
+        zanis = self.ani_dictionary.getset(cluster)
+        cliqueness = sum([a != self.ani_dictionary.default for a in zanis])/len(zanis)
         clique_ani = 100.0 if len(zanis) == 0 else min(zanis)
 
         sub_anis = sorted([a for a in zanis if a < self.strain_cutoff], reverse=True)
         if len(sub_anis) == 0:
             stab_clique_ani = clique_ani
         else :
-            stab_clique_ani = sub_anis[int(len(sub_anis)*denoising_cutoff)]
+            stab_clique_ani = sub_anis[int(len(sub_anis)*self.denoising_cutoff)]
 
         nb_genomes = len(cluster)
         mean_ani = mean([a for a in zanis if a ])
@@ -46,7 +46,7 @@ class cliqueblocksClustering:
                 'cliqueness'      : cliqueness,
             }
 
-    def leaf2cluster(self, leaf, stats):
+    def _leaf2cluster(self, leaf, stats):
         current_stats = stats[leaf]
         parent_id = current_stats['parent_id']
         if parent_id is None :
@@ -55,20 +55,20 @@ class cliqueblocksClustering:
         parent_stats = stats[parent_id]
 
         if current_stats['is_leaf'] and parent_stats['stab_clique_ani'] > self.bottom_cutoff:
-            return leaf2cluster(parent_id, stats, self.gap_size)
+            return self._leaf2cluster(parent_id, stats)
         
-        if parent_stats['stab_clique_ani'] > strain_cutoff:
-            return leaf2cluster(parent_id, stats, self.gap_size)
+        if parent_stats['stab_clique_ani'] > self.strain_cutoff:
+            return self._leaf2cluster(parent_id, stats)
 
         if (current_stats['stab_clique_ani'] - parent_stats['stab_clique_ani']) < self.gap_size:
-            return leaf2cluster(parent_id, stats, self.gap_size)
+            return self._leaf2cluster(parent_id, stats)
 
         return current_stats['genomes'] 
 
     def _get_guidetree_stats(self, tree):
-        nstats = {node_stats['node_id'] : node_stats for node_stats in tree.get_nodes_info()  }
+        nstats = {node_stats['id'] : node_stats for node_stats in tree.get_nodes_info()  }
         for k,v in nstats.items():
-            v.update(self.cluster_info(v['genomes']))     
+            v.update(self._get_cluster_info(v['genomes']))     
         return nstats
     
     def cluster_simple(self):
@@ -79,7 +79,7 @@ class cliqueblocksClustering:
             if to_cluster == ori_set:
                 tree = self.guide_tree
             else:
-                tree = get_guidetree_class(self.guide_tree_class)
+                tree = get_guidetree_class(self.guidetree_class)
                 tree.compute_tree(self.ani_dictionary, subset=to_cluster)
             
             nstats = self._get_guidetree_stats(tree)
@@ -87,12 +87,12 @@ class cliqueblocksClustering:
             ids_ = [k for k,v in  nstats.items() if v['is_leaf']]
             clusters = []
             for i in ids_ :
-                clusters += [frozenset(leaf2cluster(i, nstats))]
+                clusters += [frozenset(self._leaf2cluster(i, nstats))]
             print(f"{len(set(clusters))} unique clusters obtained from {len(ids_)} genomes")
                 
             print("derep and merge clusters")
 
-            print(f"{len(set(clusters))} unique clusters left after removing clusters {size_cutoff} or smaller")
+            print(f"{len(set(clusters))} unique clusters left after removing clusters {self.size_cutoff} or smaller")
             
             clusters = list(set(clusters) - {frozenset(ori_set)})
 
@@ -115,7 +115,7 @@ class cliqueblocksClustering:
             else :
                 to_cluster = []
 
-        final_clusters = list(set([c for c in set(final_clusters) if len(c) > size_cutoff]))    
+        final_clusters = list(set([c for c in set(final_clusters) if len(c) > self.size_cutoff]))    
             
         print(f"Final cluster count {len(final_clusters)} accounting for {len(frozenset.union(*final_clusters))} genomes (e.g. {100*len(frozenset.union(*final_clusters))/len(ori_set)}% of the genomes")
-        return final_clusters
+        self.final_clusters = final_clusters
