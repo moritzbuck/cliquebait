@@ -92,7 +92,7 @@ class cliqueblocksClustering:
                 
             print("derep and merge clusters")
 
-            print(f"{len(set(clusters))} unique clusters left after removing clusters {self.size_cutoff} or smaller")
+            print(f"{len(set(clusters))} unique clusters left after dereplication")
             
             clusters = list(set(clusters) - {frozenset(ori_set)})
 

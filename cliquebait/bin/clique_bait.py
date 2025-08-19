@@ -39,7 +39,7 @@ def main(**arg):
     clustering.cluster_simple()
 #    clustering.draw_network(clusters=clustering.final_clusters)
     dendro = clustering.guide_tree.draw_dendrogram(clusters=clustering.final_clusters, file = "dendrogram.pdf")
-    clustering.draw_network(clusters=clustering.final_clusters, file = "karate.pdf")
+#    clustering.draw_network(clusters=clustering.final_clusters, file = "karate.pdf")
 
     with open(output, 'w') as f:
         json.dump(clustering.get_clusters_stats(), f, indent=4)
