@@ -127,6 +127,8 @@ class cliqueblocksClustering:
         from matplotlib import colors, cm
         import networkx
 
+        plt.clf()
+
         if subset:
             genomes = subset
         else :

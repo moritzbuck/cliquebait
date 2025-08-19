@@ -101,6 +101,8 @@ class Hierarchicalnodeing:
         from matplotlib import colormaps
         from scipy.cluster.hierarchy import dendrogram
 
+        plt.clf()
+
         clusters = sorted(clusters, key = len, reverse= False)
         node2cluster = {i : clstr for clstr in clusters for i in self.find_nodes(clstr)}
         cmapLight = colormaps['gist_rainbow'].resampled(len(clusters))
