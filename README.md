@@ -1,3 +1,7 @@
+# DISCLAIMER
+
+THIS IS STILL VERY ALPHA but looks like it works
+
 # CliqueBait
 
 CliqueBait identifies bacterial species, pseudo-species, or metagenomic Operational Taxonomic Units (mOTUs). Not sure yet "which"...
@@ -32,6 +36,8 @@ right now is mainly a `json`-file, with a dictionary for each cluster containing
 * genomes : list of genomes in that cluster
 * anis : all anis of that cluster
 
+Also it generated an ugly netowkr figure (to improve a lot), and a somwhat useable dendrogram which needs to be made more readable too.
+
 ## dependencies:
 
 * scipy
@@ -40,8 +46,6 @@ right now is mainly a `json`-file, with a dictionary for each cluster containing
 * networkx
 * and probably more to come .....
 
-## Contributing
-
 ## License
 
-MIT License
+GNU AFFERO GENERAL PUBLIC LICENSE v3
