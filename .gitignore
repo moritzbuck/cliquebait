@@ -88,3 +88,8 @@ venv.bak/
 *.log
 *.txt
 *.pickle
+
+__pycache__/
+.vscode/
+
+*.gz
