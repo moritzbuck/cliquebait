@@ -6,14 +6,20 @@ from cliquebait.utils import parse_fastani_output
 from cliquebait.guidetrees import available_guidetrees, get_guidetree_class
 from cliquebait.clustering.cliquebaitClustering import cliqueblocksClustering
 import cliquebait
+import json
+
 
 description_text = "TO DO"
 
 
 def main(**arg): 
     cliquebait.set_verbose(arg['verbose'])
-    output = arg['output']
+    output = arg['output'][0] if arg['output'] else sys.stdout
     force = arg['force']
+
+    if output != sys.stdout and os.path.exists(output) and not arg['force']:
+        print(f"Output file {output} already exists. Use --force to overwrite.", file=stderr)
+        sys.exit(1)
 
     if cliquebait.get_verbose() > 1:
         print("SuperVerbose mode is enabled", file=stderr)
@@ -32,7 +38,11 @@ def main(**arg):
     clustering = cliqueblocksClustering(guide_tree_type, anis, gap_size=gap_size, strain_cutoff=strain_cutoff, bottom_cutoff=bottom_cutoff, denoising_cutoff=denoising_cutoff, size_cutoff=size_cutoff)  
     clustering.cluster_simple()
 #    clustering.draw_network(clusters=clustering.final_clusters)
-    clustering.guide_tree.draw_dendrogram(clusters=clustering.final_clusters)
+    dendro = clustering.guide_tree.draw_dendrogram(clusters=clustering.final_clusters, file = "dendrogram.pdf")
+    clustering.draw_network(clusters=clustering.final_clusters, file = "karate.pdf")
+
+    with open(output, 'w') as f:
+        json.dump(clustering.get_clusters_stats(), f, indent=4)
 
 
 if __name__ == "__main__":

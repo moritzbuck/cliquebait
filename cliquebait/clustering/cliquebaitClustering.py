@@ -121,7 +121,7 @@ class cliqueblocksClustering:
         self.final_clusters = final_clusters
 
 
-    def draw_network(self, clusters = None, subset = None, gravity = 3, cutoff = 0.95, layout = None):
+    def draw_network(self, clusters = None, subset = None, gravity = 3, cutoff = 0.95, layout = None, file = None):
         # position map
         import matplotlib.pyplot as plt
         from matplotlib import colors, cm
@@ -178,5 +178,17 @@ class cliqueblocksClustering:
                 )
 
         plt.axis('off')
-        plt.savefig("karate.png")
-        plt.show()
+        if file:
+            plt.savefig(file, format='pdf')
+        else:   
+            plt.show()
+
+    def get_clusters_stats(self):
+
+        cinfor = [ self._get_cluster_info(cluster) for cluster in self.final_clusters]
+        for i, c in enumerate(cinfor):
+            c['id'] = i+1
+            c['genomes'] = list(self.final_clusters[i])
+            c['anis'] = self.ani_dictionary.getset(c['genomes'])
+        
+        return cinfor

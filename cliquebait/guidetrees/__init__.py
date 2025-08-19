@@ -96,7 +96,7 @@ class Hierarchicalnodeing:
     def find_nodes(self, clstr):
         return {node.id for node in self.iterate_nodes()  if clstr.intersection(self.get_node_info(node)['genomes'])}
 
-    def draw_dendrogram(self, clusters):
+    def draw_dendrogram(self, clusters, file = None):
         from matplotlib import pyplot as plt
         from matplotlib import colormaps
         from scipy.cluster.hierarchy import dendrogram
@@ -111,6 +111,8 @@ class Hierarchicalnodeing:
         plt.title('Dendrogram')
         plt.xlabel('Sample Index')
         plt.ylabel('Distance')
-        plt.savefig('dendrogram.png')
-        plt.close()
+        if file:
+            plt.savefig(file, format='pdf')
+        else:
+            plt.show()
         

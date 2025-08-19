@@ -14,7 +14,7 @@ def parse_fastani_output(fastani_file: str, na_val = None) -> dict:
         raise FileNotFoundError(f"File not found: {fastani_file}")
 
     with open(fastani_file) as handle:
-        anis = [l.strip().split() for l in handle]
+        anis = [l.strip().split() for l in handle if not l.startswith("query")]
     anis = {(v[0], v[1]) : float(v[2]) for v in anis}
 
     dreped_anis = {frozenset((k[0],k[1])) :  v if (k[1], k[0]) not in anis else mean([v, anis[(k[1], k[0])]]) for k, v in anis.items() if k[0] != k[1]}

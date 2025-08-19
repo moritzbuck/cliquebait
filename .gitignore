@@ -77,3 +77,14 @@ env.bak/
 venv.bak/
 
 .conda/
+*.csv
+*.tsv
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.json
+*.log
+*.txt
+*.pickle
