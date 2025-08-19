@@ -26,6 +26,7 @@ class Hierarchicalnodeing:
         self.method = method
         self.genomes = None
         self.tree = None
+        self.links = None
         self.node2parent = {}
 
 
@@ -39,8 +40,8 @@ class Hierarchicalnodeing:
         self.genomes = list(self.genomes)
         square = [[(100 - ani_dictionary[frozenset((g1,g2)) ])/100 for g2 in self.genomes ] for g1 in self.genomes]
         panis = pdist(array(square, dtype = float))
-        links_ = linkage(panis, method=self.method)
-        self.tree = to_tree(links_)
+        self.links = linkage(panis, method=self.method)
+        self.tree = to_tree(self.links)
         self.node2parent = { node.id : parent for node, parent in self.iterate_nodes_parents()}
 
     def iterate_nodes_parents(self):
@@ -91,3 +92,25 @@ class Hierarchicalnodeing:
                 'genomes': [self.genomes[leaf.id] for leaf in self.get_leaves(node)],
                 'parent_id' : self.node2parent.get(node.id, None)
             }
+        
+    def find_nodes(self, clstr):
+        return {node.id for node in self.iterate_nodes()  if clstr.intersection(self.get_node_info(node)['genomes'])}
+
+    def draw_dendrogram(self, clusters):
+        from matplotlib import pyplot as plt
+        from matplotlib import colormaps
+        from scipy.cluster.hierarchy import dendrogram
+
+        clusters = sorted(clusters, key = len, reverse= False)
+        node2cluster = {i : clstr for clstr in clusters for i in self.find_nodes(clstr)}
+        cmapLight = colormaps['gist_rainbow'].resampled(len(clusters))
+
+        colorMap = { cluster : '#%02x%02x%02x' %  tuple([int(f*255) for f in  cmapLight(i)[:3]]) for i, cluster in enumerate(clusters)}
+        plt.figure(figsize=(10, 7))
+        dendrogram(self.links, color_threshold = None, link_color_func = lambda x : "#000000" if node2cluster.get(x, None) == None else colorMap[node2cluster[x]])
+        plt.title('Dendrogram')
+        plt.xlabel('Sample Index')
+        plt.ylabel('Distance')
+        plt.savefig('dendrogram.png')
+        plt.close()
+        

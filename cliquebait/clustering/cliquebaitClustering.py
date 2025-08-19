@@ -1,6 +1,6 @@
-from cliqueblocks import get_verbose
+from cliquebait import get_verbose
 from statistics import mean
-from cliqueblocks.guidetrees import get_guidetree_class
+from cliquebait.guidetrees import get_guidetree_class
 
 class cliqueblocksClustering:
 
@@ -119,3 +119,64 @@ class cliqueblocksClustering:
             
         print(f"Final cluster count {len(final_clusters)} accounting for {len(frozenset.union(*final_clusters))} genomes (e.g. {100*len(frozenset.union(*final_clusters))/len(ori_set)}% of the genomes")
         self.final_clusters = final_clusters
+
+
+    def draw_network(self, clusters = None, subset = None, gravity = 3, cutoff = 0.95, layout = None):
+        # position map
+        import matplotlib.pyplot as plt
+        from matplotlib import colors, cm
+        import networkx
+
+        if subset:
+            genomes = subset
+        else :
+            genomes = self.ani_dictionary.genomes
+
+        edges = { frozenset(k)  for k,v in self.ani_dictionary.items() if all([kk in genomes for kk in k]) and v > cutoff}
+        graph = networkx.Graph(list(edges))
+
+        if layout : 
+            pos = layout
+        else:
+            pos = networkx.spring_layout(graph, method = "energy", gravity = gravity)
+        if clusters : 
+            genome2cluster = {gg : i+1 for i,g in  enumerate(clusters) for gg in g}
+            clustering = {g : genome2cluster.get(g, 0) for g in genomes}
+        else :
+            clustering = {gg : 0 for gg in genomes}
+
+        # community ids
+        
+        communities =  [clustering.get(g, 0) for g in graph]
+        numCommunities = max(communities)+1
+        # color map from http://colorbrewer2.org/
+        cmapLight = colors.ListedColormap(['#a6cee3', '#b2df8a', '#fb9a99', '#fdbf6f', '#cab2d6'], 'indexed', numCommunities)
+        cmapDark = colors.ListedColormap(['#1f78b4', '#33a02c', '#e31a1c', '#ff7f00', '#6a3d9a'], 'indexed', numCommunities)
+
+        # edges
+        networkx.draw_networkx_edges(graph, pos)
+
+        # nodes
+        nodeCollection = networkx.draw_networkx_nodes(graph,
+                pos = pos,
+                node_color = communities,
+                cmap = cmapLight
+        )
+        # set node border color to the darker shade
+        darkColors = [cmapDark(v) for v in communities]
+        nodeCollection.set_edgecolor(darkColors)
+
+        # Print node labels separately instead
+        for n in graph.nodes():
+                plt.annotate(n,
+                        xy = pos[n],
+                        textcoords = 'offset points',
+                        horizontalalignment = 'center',
+                        verticalalignment = 'center',
+                        xytext = [0, 2],
+                        color = cmapDark(clustering.get(n,0))
+                )
+
+        plt.axis('off')
+        plt.savefig("karate.png")
+        plt.show()

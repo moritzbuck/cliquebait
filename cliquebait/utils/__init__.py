@@ -1,5 +1,5 @@
 from statistics import mean
-from cliqueblocks import get_verbose
+from cliquebait import get_verbose
 import os
 
 
@@ -62,34 +62,4 @@ class ani_dict(MutableMapping):
         return [self.get(frozenset((g1,g2))) for i,g1 in enumerate(set_) for j, g2 in enumerate(set_) if j > i]
     
 
-def get_clustering_stats(clusters):
-    data = [ f"{c['clique_id']}\t{c['nb_genomes']}\t{c['mean_ani']}\t{c['min_ani']}\t{a}\t{c['ani_limit']}\n"  for c in clique_stats([c for c in set(clusters)]) for a in c['anis']]
-    with open("clust_stat.tsv", "w") as handle:
-        handle.writelines(["id\tnb_genomes\tmean_ani\tmin_ani\tani_val\tanit_cutoff\n"] + data)
 
-def find_cluster(cluster_id, clstrs, stats):
-    ns = stats[cluster_id]
-    nomes = frozenset(ns['genomes'])
-    if nomes in clstrs :
-        return nomes
-    if ns['parent_id'] is None:
-        return None
-    return find_cluster(ns['parent_id'], clstrs, stats)
-
-def find_nodes(clstr, stats):
-    return {k for k,v in stats.items() if clstr.intersection(v['genomes'])}
-            
-def make_dendrogram(clstrs, stats):
-    clstrs = sorted(clstrs, key = len, reverse= False)
-    node2cluster = {i : clstr for clstr in clstrs for i in find_nodes(clstr, stats)}
-    #    node2cluster = {i : find_cluster(i, clstrs, stats) foclr i in stats.keys() }
-    cmapLight = matplotlib.colormaps['gist_rainbow'].resampled(len(clstrs))
-
-    colorMap = { cluster : '#%02x%02x%02x' %  tuple([int(f*255) for f in  cmapLight(i)[:3]]) for i, cluster in enumerate(clstrs)}
-    plt.clf()
-    plt.figure(figsize=(10, 7))
-    dendrogram(links_, color_threshold = None, link_color_func = lambda x : "#000000" if node2cluster.get(x, None) == None else colorMap[node2cluster[x]])
-    plt.title('Dendrogram')
-    plt.xlabel('Sample Index')
-    plt.ylabel('Distance')
-    plt.show(block = False)
