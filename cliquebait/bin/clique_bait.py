@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 from sys import stderr
-from cliquebait.utils import parse_fastani_output
+from cliquebait.utils import parse_fastani_output, checkm_parser
 from cliquebait.guidetrees import available_guidetrees, get_guidetree_class
 from cliquebait.clustering.cliquebaitClustering import cliqueblocksClustering
 import cliquebait
@@ -13,10 +13,11 @@ description_text = "TO DO"
 
 
 def main(**arg): 
-    cliquebait.set_verbose(arg['verbose'])
+    cliquebait.verbose = arg['verbose']
     output = arg['output'][0] if arg['output'] else sys.stdout
     force = arg['force']
-    
+    checkm = arg['checkm'][0].split(";") if arg['checkm'] else None
+
     if output != sys.stdout and os.path.exists(output) and not arg['force']:
         print(f"Output file {output} already exists. Use --force to overwrite.", file=stderr)
         sys.exit(1)
@@ -25,6 +26,7 @@ def main(**arg):
         print("SuperVerbose mode is enabled", file=stderr)
         print(f"Arguments: {arg}", file=stderr)
 
+
     gap_size = arg['gap_size'][0]
     strain_cutoff = arg['strain_cutoff'][0]
 
@@ -32,7 +34,24 @@ def main(**arg):
     denoising_cutoff = arg['denoising_cutoff'][0]
     size_cutoff = arg['min_size'][0]
 
+
     anis = parse_fastani_output(arg['similarities'][0])
+
+    if checkm:
+        if len(checkm) == 1:
+            checkm_file = checkm[0]
+            checkm_completeness = cliquebait.default_checkm_completeness
+            checkm_contamination = cliquebait.default_checkm_contamination
+        else:
+            checkm_file, checkm_completeness, checkm_contamination = checkm
+            checkm_completeness = float(checkm_completeness)
+            checkm_contamination = float(checkm_contamination)
+        if cliquebait.get_verbose() > 0:
+            print(f"Parsing CHECKM data from {checkm_file}, completeness: {checkm_completeness}, contamination: {checkm_contamination}", file=stderr)
+        checkm_genomes = checkm_parser(checkm_file, checkm_completeness, checkm_contamination)
+        
+        anis.filter_genomes(checkm_genomes)
+
     guide_tree_type = arg['guide_tree'][0]
 
     clustering = cliqueblocksClustering(guide_tree_type, anis, gap_size=gap_size, strain_cutoff=strain_cutoff, bottom_cutoff=bottom_cutoff, denoising_cutoff=denoising_cutoff, size_cutoff=size_cutoff)  
@@ -66,7 +85,7 @@ if __name__ == "__main__":
     parser.add_argument('--denoising_cutoff', '-d', nargs = 1, type=float, default = [cliquebait.default_denoising_cutoff], help = f"Similarities of a branch are ordered in decreasing order above that threshold are ignored in the clustering (considered intra-species clusters, e.g. strain), default {cliquebait.default_strain_cutoff}")
     parser.add_argument('--version','-V', action="store_true", help = "get version and exit")
     parser.add_argument('--verbose','-v', nargs="?", const=1, default=1, help = "Set the verbosity level (0-3), default 1. 0 is silent, 1 (or no value) is normal, above is debug mode")
-
+    parser.add_argument('--checkm', '-C', nargs = 1, type=str, help = f"checkm filter formated as 'file;completeness_cutoff;contamination_cutoff', mainly implemented for debugging and stuff", required=False)
     args = parser.parse_args()
     
     if args.version:

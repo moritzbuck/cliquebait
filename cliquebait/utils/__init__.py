@@ -1,7 +1,18 @@
+import re
 from statistics import mean
 from cliquebait import get_verbose
 import os
 
+def checkm_parser(checkm_file: str, completeness : float, contamination : float) -> list:
+    with open(checkm_file) as handle:
+        handle.readline()
+        handle.readline()
+        handle.readline()
+        lines = [l.strip() for l in handle.readlines()][:-1]
+
+    checkm = { "_".join(l.split("_")[:2]) : [ float(c) for c in  re.split("\s+", l)[-3:-1]]  for l in lines }
+    genomes = [k for k,v in checkm.items() if v[0] >= completeness and v[1] <= contamination]
+    return genomes
 
 def parse_fastani_output(fastani_file: str, na_val = None) -> dict:
     """
@@ -31,7 +42,18 @@ class ani_dict(MutableMapping):
             self[k] = v
             for kk in k:
                 self.genomes.add(kk)
-        self.default = na_val if na_val is not None else min(self.store.values()) 
+        self.default = na_val if na_val is not None else min(self.store.values())
+
+    def __repr__(self):
+        return f"ani_dict({self.store})"
+
+    def _clean_genome_name(self, g):
+        return ".".join(os.path.basename(g).split(".")[:-1])
+
+    def filter_genomes(self, genomes):
+        genomes = set(genomes)
+        self.store = {k: v for k, v in self.store.items() if all([self._clean_genome_name(kk) in genomes for kk in k])}
+        self.genomes = genomes
 
 
     def __missing__(self, key):
