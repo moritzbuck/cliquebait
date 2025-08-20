@@ -7,7 +7,7 @@ import argparse
 import os
 import sys
 from sys import stderr
-from cliquebait.utils import parse_fastani_output
+from cliquebait.utils import parse_fastani_output, checkm_parser
 from cliquebait.guidetrees import available_guidetrees, get_guidetree_class
 from cliquebait.clustering.cliquebaitClustering import cliqueblocksClustering
 import cliquebait
@@ -16,8 +16,10 @@ from plotnine import *
 
 description_text = "TO DO"
 
-anis = parse_fastani_output("/data/moritz/0079_pelaginet/fastani_bact.all_v_all.tsv")
+anis = parse_fastani_output("/data/moritz/0079_pelaginet/fastani_meth.all_v_all.tsv")
+checkm_genomes = checkm_parser("/data/moritz/0079_pelaginet/checkm_meth.txt", 70, 5)
 
+anis.filter_genomes(checkm_genomes)
 clustering2 = cliqueblocksClustering(default_guidetree, anis, gap_size=0, strain_cutoff=95, bottom_cutoff=95, denoising_cutoff=0.95, size_cutoff=10)
 clustering2.cluster_simple()
 

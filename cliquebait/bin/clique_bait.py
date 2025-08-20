@@ -48,8 +48,11 @@ def main(**arg):
             checkm_contamination = float(checkm_contamination)
         if cliquebait.get_verbose() > 0:
             print(f"Parsing CHECKM data from {checkm_file}, completeness: {checkm_completeness}, contamination: {checkm_contamination}", file=stderr)
-        checkm_genomes = checkm_parser(checkm_file, checkm_completeness, checkm_contamination)
         
+        checkm_genomes = checkm_parser(checkm_file, checkm_completeness, checkm_contamination)
+        if cliquebait.get_verbose() > 0:
+            print(f"{len(checkm_genomes)} passed filters, out of {len(anis.genomes)}", file=stderr)
+
         anis.filter_genomes(checkm_genomes)
 
     guide_tree_type = arg['guide_tree'][0]
