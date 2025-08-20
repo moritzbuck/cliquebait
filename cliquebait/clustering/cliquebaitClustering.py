@@ -194,3 +194,18 @@ class cliqueblocksClustering:
             c['anis'] = self.ani_dictionary.getset(c['genomes'])
         
         return cinfor
+    
+    def draw_histograms(self, file = None):
+        import matplotlib.pyplot as plt
+        from plotnine import ggplot, aes, geom_histogram, facet_wrap, geom_vline
+        import pandas
+        plt.clf()
+        data = [(v['id'],v['clique_ani'],v['stab_clique_ani'],v['mean_ani'],v['cliqueness'], a) for v in self.get_clusters_stats() for a in v['anis']]
+        df = pandas.DataFrame.from_records(data)
+        df.columns = ['id', 'min_ani', 'denoised_cutoff', 'mean_ani', 'cliqueness', 'ani']
+        p = (ggplot(data=df, mapping=aes(x='ani'))+geom_histogram(bins = 30)+facet_wrap("~id", scales = "free_y") +geom_vline(mapping = aes(xintercept = "denoised_cutoff"), color = "red")+geom_vline(xintercept = 95))
+        g = p.draw()
+        if file:
+            g.savefig(file, format='pdf')
+        else:
+            g.show()

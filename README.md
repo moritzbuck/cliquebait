@@ -42,8 +42,7 @@ Also it generated an ugly netowkr figure (to improve a lot), and a somwhat useab
 
 * scipy
 * numpy
-* matplotlib
-* networkx
+* matplotlib, networkx, pandas and plotnine if you want the plots
 * and probably more to come .....
 
 ## License
