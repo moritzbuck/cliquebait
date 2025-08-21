@@ -1,7 +1,7 @@
 import argparse
 import os
 import sys
-from sys import stderr
+from sys import stderr, stdout
 from cliquebait.utils import parse_fastani_output, checkm_parser
 from cliquebait.guidetrees import available_guidetrees, get_guidetree_class
 from cliquebait.clustering.cliquebaitClustering import cliqueblocksClustering
@@ -14,11 +14,11 @@ description_text = "TO DO"
 
 def main(**arg): 
     cliquebait.verbose = arg['verbose']
-    output = arg['output'][0] if arg['output'] else sys.stdout
+    output = arg['output'][0] if arg['output'] else None
     force = arg['force']
     checkm = arg['checkm'][0].split(";") if arg['checkm'] else None
 
-    if output != sys.stdout and os.path.exists(output) and not arg['force']:
+    if output and os.path.exists(output) and not arg['force']:
         print(f"Output file {output} already exists. Use --force to overwrite.", file=stderr)
         sys.exit(1)
 
@@ -69,9 +69,11 @@ def main(**arg):
         clustering.guide_tree.draw_dendrogram(clusters=clustering.final_clusters, file=plot_prefix + "_dendrogram.pdf")
         clustering.draw_histograms(file=plot_prefix + "_histograms.pdf")
 
-    with open(output, 'w') as f:
-        json.dump(clustering.get_clusters_stats(), f, indent=4)
-
+    if output:
+        with open(output, 'w') as f:
+            json.dump(clustering.get_clusters_stats(), f, indent=4)
+    else : 
+        print(json.dumps(clustering.get_clusters_stats(), indent = 4), file=stdout)
 
 if __name__ == "__main__":
 
