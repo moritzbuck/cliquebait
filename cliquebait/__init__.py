@@ -1,6 +1,6 @@
 
 _verbose_level_=1
-version = 0.1
+version = "0.0.2"
 default_gap_size = 2.5
 default_strain_cutoff = 99.9
 default_lower_cutoff = 89.0
