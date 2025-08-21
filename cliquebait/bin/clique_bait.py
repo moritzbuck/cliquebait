@@ -65,7 +65,7 @@ def main(**arg):
     if plot_prefix:
         if cliquebait.get_verbose() > 0:
             print(f"Plotting results with prefix: {plot_prefix}", file=stderr)
-        clustering.draw_network(clusters=clustering.final_clusters, file=plot_prefix + "_network.pdf")
+        #clustering.draw_network(clusters=clustering.final_clusters, file=plot_prefix + "_network.pdf")
         clustering.guide_tree.draw_dendrogram(clusters=clustering.final_clusters, file=plot_prefix + "_dendrogram.pdf")
         clustering.draw_histograms(file=plot_prefix + "_histograms.pdf")
 

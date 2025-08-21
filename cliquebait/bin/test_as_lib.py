@@ -20,10 +20,10 @@ anis = parse_fastani_output("/data/moritz/0079_pelaginet/fastani_meth.all_v_all.
 checkm_genomes = checkm_parser("/data/moritz/0079_pelaginet/checkm_meth.txt", 70, 5)
 
 anis.filter_genomes(checkm_genomes)
-clustering2 = cliqueblocksClustering(default_guidetree, anis, gap_size=0, strain_cutoff=95, bottom_cutoff=95, denoising_cutoff=0.95, size_cutoff=10)
-clustering2.cluster_simple()
+clustering = cliqueblocksClustering(default_guidetree, anis, gap_size=0, strain_cutoff=95, bottom_cutoff=95, denoising_cutoff=0.95, size_cutoff=1)
+clustering.cluster_simple()
 
-clustering = cliqueblocksClustering(default_guidetree, anis, size_cutoff=10)
+clustering = cliqueblocksClustering(default_guidetree, anis, size_cutoff=3)
 clustering.cluster_simple()
 
 clustering.guide_tree.draw_dendrogram(clusters=clustering.final_clusters)

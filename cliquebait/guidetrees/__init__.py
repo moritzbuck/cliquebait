@@ -1,3 +1,4 @@
+import os
 from scipy.cluster.hierarchy import linkage, to_tree
 from scipy.spatial.distance import pdist, squareform
 from numpy import array
@@ -104,12 +105,15 @@ class Hierarchicalnodeing:
         plt.clf()
 
         clusters = sorted(clusters, key = len, reverse= False)
+        genome2cluster = {g : i for i,clstr in enumerate(clusters) for g in clstr}
         node2cluster = {i : clstr for clstr in clusters for i in self.find_nodes(clstr)}
         cmapLight = colormaps['gist_rainbow'].resampled(len(clusters))
-
+        nice_name = lambda x : ".".join(os.path.basename(x).split(".")[:-1]).split("_genomic")[0]
         colorMap = { cluster : '#%02x%02x%02x' %  tuple([int(f*255) for f in  cmapLight(i)[:3]]) for i, cluster in enumerate(clusters)}
-        plt.figure(figsize=(10, 7))
-        dendrogram(self.links, color_threshold = None, link_color_func = lambda x : "#000000" if node2cluster.get(x, None) == None else colorMap[node2cluster[x]])
+        plt.figure(figsize=(30, 21))
+        dendrogram(self.links, color_threshold = None, leaf_font_size = 4, orientation='bottom',
+                link_color_func = lambda x : "#000000" if node2cluster.get(x, None) == None else colorMap[node2cluster[x]], 
+                leaf_label_func=lambda x: nice_name(self.genomes[int(x)]) + ";" + str(genome2cluster.get(self.genomes[int(x)], "Unclustered")))
         plt.title('Dendrogram')
         plt.xlabel('Sample Index')
         plt.ylabel('Distance')
