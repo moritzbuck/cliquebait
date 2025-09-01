@@ -45,3 +45,41 @@ tree_stats = {v['id'] : v for v in clustering.guide_tree.get_nodes_info()}
 test_genomes = list(missed_cluster[0])[350]
 
 node = [v for v in tree_stats.values() if test_genomes in v['genomes'] and len(v['genomes']) == 1][0]
+
+
+from cliquebait.simulation import Genome
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+from plotnine import ggplot, aes, geom_histogram, facet_wrap, geom_vline
+import pandas
+from random import choice
+
+luca = Genome()
+pop_size = 100
+pop = [luca.mutate() for i in range(pop_size)]
+
+for gen in tqdm(range(100)):
+    pop = [p.mutate(0.001) for p in pop]
+
+all_anis = [ p.ani(q) for i,p in enumerate(pop) for j,q in enumerate(pop) if i > j]
+
+data = pandas.DataFrame.from_records({ 'anis' : all_anis, 'model' : 'pure_drift'})
+p = (ggplot(data=data, mapping=aes(x='anis'))+geom_histogram(bins = 30))
+p.draw().show()
+
+luca = Genome()
+pop_size = 1000
+pop = [luca.mutate() for i in range(pop_size)]
+
+for gen in tqdm(range(1000)):
+    pop = [p.mutate(0.0001) for p in pop]
+#    for p in pop:
+#        target = choice(pop)
+#        if p.ani(target) > 90:
+#            p.homologous_recomb(target, 300)
+
+all_anis = [ p.ani(q) for i,p in enumerate(pop) for j,q in enumerate(pop) if i > j]
+
+data = pandas.DataFrame.from_records({ 'anis' : all_anis})
+p = (ggplot(data=data, mapping=aes(x='anis'))+geom_histogram(bins = 100))#+xlim(87,100))
+p.draw().show()
