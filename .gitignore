@@ -95,3 +95,10 @@ __pycache__/
 *.gz
 
 test*
+
+work/
+
+.nextflow*
+.nextflow/
+\#*\#
+*~
