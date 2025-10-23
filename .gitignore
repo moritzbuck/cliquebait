@@ -86,7 +86,6 @@ venv.bak/
 *.svg
 *.json
 *.log
-*.txt
 *.pickle
 
 __pycache__/
