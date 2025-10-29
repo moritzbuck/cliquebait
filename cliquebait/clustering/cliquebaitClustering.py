@@ -80,7 +80,11 @@ class cliqueblocksClustering:
                 tree = self.guide_tree
             else:
                 tree = get_guidetree_class(self.guidetree_class)
-                tree.compute_tree(self.ani_dictionary, subset=to_cluster)
+                try :
+                    tree.compute_tree(self.ani_dictionary, subset=to_cluster)
+                except ValueError:
+                    self.final_clusters = []
+                    return 
             
             nstats = self._get_guidetree_stats(tree)
 
@@ -116,8 +120,9 @@ class cliqueblocksClustering:
                 to_cluster = []
 
         final_clusters = list(set([c for c in set(final_clusters) if len(c) > self.size_cutoff]))    
-            
-        print(f"Final cluster count {len(final_clusters)} accounting for {len(frozenset.union(*final_clusters))} genomes (e.g. {100*len(frozenset.union(*final_clusters))/len(ori_set)}% of the genomes")
+        ll = 0 if len(final_clusters) == 0 else len(frozenset.union(*final_clusters))
+        pp = 0 if len(final_clusters) == 0 else 100*len(frozenset.union(*final_clusters))/len(ori_set)
+        print(f"Final cluster count {len(final_clusters)} accounting for {ll} genomes (e.g. {pp}% of the genomes")
         self.final_clusters = final_clusters
 
 

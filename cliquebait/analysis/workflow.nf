@@ -2,6 +2,7 @@
 
 include { download } from "./processes.nf"
 include { fastani } from "./processes.nf"
+include { cliquebait } from "./processes.nf"
 
 workflow {
    
@@ -28,8 +29,14 @@ workflow {
             } 
         | set{ fastani_sets}
 
-    fastani_sets.todo
-        | fastani
+//    fastani_sets.todo
+//        | fastani
+//        | set { fastanied }
+
+    fastani_sets.done.map { taxon -> file("${taxon}_fastani.tsv".replace("genomes/", "fastanis/")) }
+//        | concat(fastanied)
+        | cliquebait
+    
 
 }
 

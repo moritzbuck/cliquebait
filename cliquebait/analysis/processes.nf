@@ -38,4 +38,22 @@ process fastani{
 
 }
 
+process cliquebait{
+    publishDir "${params.cliquebait_out}", mode: 'copy'
+    input:  
+    file(fastani_file)
+    output:
+    file("*.json")
+    script:
+    """
+    cwd=`pwd`
+    cd ${params.cliquebait_path}
+    outfile=`echo ${fastani_file} | sed 's/_fastani.tsv/_baits.json/'`
+    python -m cliquebait.bin.clique_bait --similarities \${cwd}/${fastani_file} -o \${cwd}/\${outfile} --min_size ${params.min_clique_size} --gap_size  ${params.gap_size} 
+    cd \${cwd}/
+    """
+
+}
+
+
 // End of file

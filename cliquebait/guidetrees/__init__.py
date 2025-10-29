@@ -41,6 +41,8 @@ class Hierarchicalnodeing:
         self.genomes = list(self.genomes)
         square = [[(100 - ani_dictionary[frozenset((g1,g2)) ])/100 for g2 in self.genomes ] for g1 in self.genomes]
         panis = pdist(array(square, dtype = float))
+        if len(panis) == 0:
+            raise ValueError("Not enough genomes with similarity information to compute a guide tree.")
         self.links = linkage(panis, method=self.method)
         self.tree = to_tree(self.links)
         self.node2parent = { node.id : parent for node, parent in self.iterate_nodes_parents()}
