@@ -45,7 +45,7 @@ class ani_dict(MutableMapping):
         return f"ani_dict({self.store})"
 
     def _clean_genome_name(self, g):
-        return ".".join(os.path.basename(g).split(".")[:-1])
+        return ".".join(os.path.basename(g).split(".")[:2])
 
     def filter_genomes(self, genomes):
         genomes = set(genomes)

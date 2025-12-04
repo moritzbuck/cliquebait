@@ -1,7 +1,7 @@
 process download {
     cpus  1
     publishDir "${params.genomes_out}", mode: 'copy'
-    errorStrategy 'retry'
+    errorStrategy 'ignore'
     maxRetries 20
     input :
     val(taxon)
@@ -47,10 +47,66 @@ process cliquebait{
     script:
     """
     cwd=`pwd`
+    sed 's#.*/\\(GC[AF]_[0-9.]*\\).*\\(GC[AF]_[0-9.]*\\).*_genomic.fna\\(.*\\)#\\1\\t\\2\\t\\3# ' ${fastani_file} > fixed_fastani.tsv
     cd ${params.cliquebait_path}
     outfile=`echo ${fastani_file} | sed 's/_fastani.tsv/_baits.json/'`
-    python -m cliquebait.bin.clique_bait --similarities \${cwd}/${fastani_file} -o \${cwd}/\${outfile} --min_size ${params.min_clique_size} --gap_size  ${params.gap_size} 
+    python -m cliquebait.bin.clique_bait --similarities \${cwd}/fixed_fastani.tsv -o \${cwd}/\${outfile} --min_size ${params.min_clique_size} --gap_size  ${params.gap_size}  --checkm "${params.checkm_path};${params.checkm_completeness};${params.checkm_contamination}"
     cd \${cwd}/
+    """
+
+}
+
+
+process genecall{
+    cpus 1
+    publishDir "${params.genecall_out}", mode: 'copy'
+    input:  
+    val(genome)    
+    output:
+    tuple val("${genome[0]}"), file("${genome[1]}.faa")
+    script:
+    """
+    fna=`find ${params.genomes_out} -name "${genome[1]}*_genomic.fna"`
+    if [ -f ${params.genecall_out}/${genome[1]}.faa  ];
+    then
+        cp ${params.genecall_out}/${genome[1]}.faa .
+        cp ${params.genecall_out}/${genome[1]}.gbk .
+    else 
+       prodigal -a ${genome[1]}.faa -c  -i \${fna} -o ${genome[1]}.gbk 
+    fi
+    """
+}
+
+process clusterAAs{
+    cpus 20
+    publishDir "${params.base_out}", mode: 'copy'
+    input:  
+    file(faa_files)
+    output:
+    file("mmsseqs_cluster.tsv")
+    script:
+    """
+    for f in `ls | grep .faa`
+    do
+        sed 's/>.*_\\([0-9]*\\) #.*/>'\${f}'_\\1/ ; s/.faa//' \${f} >> all_genes.faa
+    done
+    mmseqs easy-cluster --min-seq-id ${params.seqid} --cov-mode ${params.covmode} -c ${params.cov} --threads ${task.cpus} all_genes.faa  mmsseqs mmseqs_temp    
+    """
+}
+
+
+process motupan{
+    publishDir "${params.motupan_out}", mode: 'copy'
+    errorStrategy 'ignore'
+    cpus 8
+    input:  
+    val(input)
+    output:
+    tuple(file("${input[0]}_motupan.csv"), file("${input[0]}_gcs.json") )
+    script:
+    """
+    mOTUpan.py --genome2gene_clusters_only  --threads ${task.cpus} --faas ${input[1].join(" ")} --output ${input[0]}_gcs.json --name ${input[0]} 
+    mOTUpan.py --gene_clusters_file  ${input[0]}_gcs.json --checkm ${params.checkm_path}  --threads ${task.cpus} --output ${input[0]}_motupan.csv --name ${input[0]} 
     """
 
 }

@@ -116,6 +116,9 @@ class cliqueblocksClustering:
                 torm = list(frozenset(ori_set) - frozenset().union(*final_clusters))
                 print( f"{len(torm)} removed as they were engulfing smalled clusters" )
                 to_cluster = torm
+                if len(to_cluster) == 1:
+                    final_clusters += [frozenset(to_cluster)]
+                    to_cluster = []
             else :
                 to_cluster = []
 

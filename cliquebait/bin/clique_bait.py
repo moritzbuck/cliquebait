@@ -50,10 +50,20 @@ def main(**arg):
             print(f"Parsing CHECKM data from {checkm_file}, completeness: {checkm_completeness}, contamination: {checkm_contamination}", file=stderr)
         
         checkm_genomes = checkm_parser(checkm_file, checkm_completeness, checkm_contamination)
+        checkm_genomes = list(set(checkm_genomes).intersection(set(anis.genomes)))
         if cliquebait.get_verbose() > 0:
             print(f"{len(checkm_genomes)} passed filters, out of {len(anis.genomes)}", file=stderr)
 
         anis.filter_genomes(checkm_genomes)
+
+    if len(anis.genomes) == 0 :
+        print("No genomes passed the filters, exiting.", file=stderr)
+        if output:
+            with open(output, 'w') as f:
+                json.dump({}, f, indent=4)
+        else : 
+            print(json.dumps({}, indent = 4), file=stdout)
+        sys.exit(0)
 
     guide_tree_type = arg['guide_tree'][0]
 
